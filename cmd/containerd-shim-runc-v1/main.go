@@ -21,8 +21,26 @@ package main
 import (
 	v1 "github.com/containerd/containerd/runtime/v2/runc/v1"
 	"github.com/containerd/containerd/runtime/v2/shim"
+	_ "net/http/pprof"
+	"net/http"
+	"io/ioutil"
+	"strconv"
 )
 
 func main() {
+	var pprofCount int
+	data, err := ioutil.ReadFile("/tmp/pprofcount.txt")
+	if err != nil {
+		pprofCount = 0
+	} else {
+		pprofCount, err = strconv.Atoi(string(data))
+		if err != nil {
+			pprofCount = 0
+		}
+	}
+	ioutil.WriteFile("/tmp/pprofcount.txt", []byte(strconv.Itoa(pprofCount+1)), 0644)
+	go func() {
+		http.ListenAndServe("localhost:" + strconv.Itoa(6060 + pprofCount), nil)
+	}()
 	shim.Run("io.containerd.runc.v1", v1.New)
 }
