@@ -34,6 +34,15 @@ import (
 	"google.golang.org/grpc/codes"
 	grpcm "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	// HACK: implement everything that is needed to communicate
+	// with NRI OCI plugins in this module. The most should be
+	// moved to better place - which will clean up the list of
+	// imports below:
+	specs "github.com/opencontainers/runtime-spec/specs-go"
+	nri "github.com/containerd/nri/v2alpha1/pkg/runtime"
+	nriapi 	"github.com/containerd/nri/v2alpha1/pkg/api"
+	"encoding/json"
 )
 
 func init() {
@@ -113,8 +122,38 @@ func (l *local) ListStream(ctx context.Context, req *api.ListContainersRequest, 
 	}))
 }
 
+// OCICreateContainer relays container OCI creation requests to NRI/plugins.
+func ociCreateContainer(ctx context.Context, id string, specBytes []byte) error {
+	var spec *specs.Spec
+	n := nri.Singleton()
+	if n == nil {
+		// error: NRI plugin hasn't been initialized yet
+		return nil
+	}
+	if err := json.Unmarshal(specBytes, &spec); err != nil {
+		// error: Invalid OCI spec data
+		return nil
+	}
+
+	nriOCIContainer := &nri.OCIContainer{
+		ContainerId: id,
+		Spec: nriapi.SpecFromOCI(spec),
+	}
+	request := &nriapi.OCICreateContainerRequest{
+		Container: nriOCIContainer,
+	}
+	_, err := n.OCICreateContainer(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (l *local) Create(ctx context.Context, req *api.CreateContainerRequest, _ ...grpc.CallOption) (*api.CreateContainerResponse, error) {
 	var resp api.CreateContainerResponse
+
+	ociCreateContainer(ctx, req.Container.ID, req.Container.Spec.Value)
 
 	if err := l.withStoreUpdate(ctx, func(ctx context.Context) error {
 		container := containerFromProto(&req.Container)

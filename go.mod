@@ -84,7 +84,7 @@ replace (
 	github.com/containerd/containerd => ./.empty-mod/
 	// Use the relative local source of the github.com/containerd/containerd/api to build
 	github.com/containerd/containerd/api => ./api
-	github.com/containerd/nri => github.com/klihub/nri v0.0.0-20210916151032-5665bdaef70c
+	github.com/containerd/nri => ../nri
 	github.com/gogo/googleapis => github.com/gogo/googleapis v1.3.2
 	// urfave/cli must be <= v1.22.1 due to a regression: https://github.com/urfave/cli/issues/1092
 	github.com/urfave/cli => github.com/urfave/cli v1.22.1

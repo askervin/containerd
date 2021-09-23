@@ -707,6 +707,7 @@ func hooksToOCI(nriHooks *nri.Hooks) *specs.Hooks {
 
 func hookSliceToOCI(nriHooks []*nri.Hook) []specs.Hook {
 	var hooks []specs.Hook
+	/*
 	for _, h := range nriHooks {
 		var timeout *int
 		if h.Timeout != 0 {
@@ -720,6 +721,7 @@ func hookSliceToOCI(nriHooks []*nri.Hook) []specs.Hook {
 			Timeout: timeout,
 		})
 	}
+	*/
 	return hooks
 }
 
@@ -768,4 +770,3 @@ func (*nriLogger) Errorf(ctx context.Context, format string, args ...interface{}
 func init() {
 	nrilog.Set(&nriLogger{})
 }
-
