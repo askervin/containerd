@@ -110,6 +110,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/knqyf263/go-plugin v0.8.1-0.20240827022226-114c6257e441 // indirect
 	github.com/mdlayher/socket v0.4.1 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect
 	github.com/mistifyio/go-zfs/v3 v3.0.1 // indirect
@@ -129,6 +130,7 @@ require (
 	github.com/smallstep/pkcs7 v0.1.1 // indirect
 	github.com/stefanberger/go-pkcs11uri v0.0.0-20230803200340-78284954bff6 // indirect
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635 // indirect
+	github.com/tetratelabs/wazero v1.9.0 // indirect
 	github.com/vishvananda/netns v0.0.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
@@ -167,4 +169,11 @@ exclude (
 	// https://github.com/kubernetes-sigs/kustomize/pull/5830#issuecomment-2569960859
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+)
+
+// use oci spec with memorypolicy
+replace (
+	github.com/containerd/nri => github.com/askervin/nri v0.1.1-0.20250423122239-0746714e20d0
+	github.com/opencontainers/runtime-spec => github.com/askervin/runtime-spec v1.0.3-0.20250423073229-57c949588e88
+	github.com/opencontainers/runtime-tools => github.com/askervin/runtime-tools v0.0.0-20250423115353-73be79a869ac
 )

@@ -83,7 +83,7 @@ type Process struct {
 	// Rlimits specifies rlimit options to apply to the process.
 	Rlimits []POSIXRlimit `json:"rlimits,omitempty" platform:"linux,solaris,zos"`
 	// NoNewPrivileges controls whether additional privileges could be gained by processes in the container.
-	NoNewPrivileges bool `json:"noNewPrivileges,omitempty" platform:"linux"`
+	NoNewPrivileges bool `json:"noNewPrivileges,omitempty" platform:"linux,zos"`
 	// ApparmorProfile specifies the apparmor profile for the container.
 	ApparmorProfile string `json:"apparmorProfile,omitempty" platform:"linux"`
 	// Specify an oom_score_adj for the container.
@@ -94,10 +94,12 @@ type Process struct {
 	SelinuxLabel string `json:"selinuxLabel,omitempty" platform:"linux"`
 	// IOPriority contains the I/O priority settings for the cgroup.
 	IOPriority *LinuxIOPriority `json:"ioPriority,omitempty" platform:"linux"`
+	// ExecCPUAffinity specifies CPU affinity for exec processes.
+	ExecCPUAffinity *CPUAffinity `json:"execCPUAffinity,omitempty" platform:"linux"`
 }
 
 // LinuxCapabilities specifies the list of allowed capabilities that are kept for a process.
-// http://man7.org/linux/man-pages/man7/capabilities.7.html
+// https://man7.org/linux/man-pages/man7/capabilities.7.html
 type LinuxCapabilities struct {
 	// Bounding is the set of capabilities checked by the kernel.
 	Bounding []string `json:"bounding,omitempty" platform:"linux"`
@@ -126,6 +128,12 @@ const (
 	IOPRIO_CLASS_BE   IOPriorityClass = "IOPRIO_CLASS_BE"
 	IOPRIO_CLASS_IDLE IOPriorityClass = "IOPRIO_CLASS_IDLE"
 )
+
+// CPUAffinity specifies process' CPU affinity.
+type CPUAffinity struct {
+	Initial string `json:"initial,omitempty"`
+	Final   string `json:"final,omitempty"`
+}
 
 // Box specifies dimensions of a rectangle. Used for specifying the size of a console.
 type Box struct {
@@ -228,6 +236,8 @@ type Linux struct {
 	Namespaces []LinuxNamespace `json:"namespaces,omitempty"`
 	// Devices are a list of device nodes that are created for the container
 	Devices []LinuxDevice `json:"devices,omitempty"`
+	// NetDevices are key-value pairs, keyed by network device name on the host, moved to the container's network namespace.
+	NetDevices map[string]LinuxNetDevice `json:"netDevices,omitempty"`
 	// Seccomp specifies the seccomp security settings for the container.
 	Seccomp *LinuxSeccomp `json:"seccomp,omitempty"`
 	// RootfsPropagation is the rootfs mount propagation mode for the container.
@@ -241,6 +251,8 @@ type Linux struct {
 	// IntelRdt contains Intel Resource Director Technology (RDT) information for
 	// handling resource constraints and monitoring metrics (e.g., L3 cache, memory bandwidth) for the container
 	IntelRdt *LinuxIntelRdt `json:"intelRdt,omitempty"`
+	// MemoryPolicy contains NUMA memory policy for the container.
+	MemoryPolicy *LinuxMemoryPolicy `json:"memoryPolicy,omitempty"`
 	// Personality contains configuration for the Linux personality syscall
 	Personality *LinuxPersonality `json:"personality,omitempty"`
 	// TimeOffsets specifies the offset for supporting time namespaces.
@@ -483,6 +495,12 @@ type LinuxDevice struct {
 	GID *uint32 `json:"gid,omitempty"`
 }
 
+// LinuxNetDevice represents a single network device to be added to the container's network namespace
+type LinuxNetDevice struct {
+	// Name of the device in the container namespace
+	Name string `json:"name,omitempty"`
+}
+
 // LinuxDeviceCgroup represents a device rule for the devices specified to
 // the device controller
 type LinuxDeviceCgroup struct {
@@ -627,6 +645,17 @@ type WindowsCPUResources struct {
 	// cycles per 10,000 cycles. Set processor `maximum` to a percentage times
 	// 100.
 	Maximum *uint16 `json:"maximum,omitempty"`
+	// Set of CPUs to affinitize for this container.
+	Affinity []WindowsCPUGroupAffinity `json:"affinity,omitempty"`
+}
+
+// Similar to _GROUP_AFFINITY struct defined in
+// https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/miniport/ns-miniport-_group_affinity
+type WindowsCPUGroupAffinity struct {
+	// CPU mask relative to this CPU group.
+	Mask uint64 `json:"mask,omitempty"`
+	// Processor group the mask refers to, as returned by GetLogicalProcessorInformationEx.
+	Group uint32 `json:"group,omitempty"`
 }
 
 // WindowsStorageResources contains storage resource management settings.
@@ -751,6 +780,10 @@ const (
 	ArchPARISC      Arch = "SCMP_ARCH_PARISC"
 	ArchPARISC64    Arch = "SCMP_ARCH_PARISC64"
 	ArchRISCV64     Arch = "SCMP_ARCH_RISCV64"
+	ArchLOONGARCH64 Arch = "SCMP_ARCH_LOONGARCH64"
+	ArchM68K        Arch = "SCMP_ARCH_M68K"
+	ArchSH          Arch = "SCMP_ARCH_SH"
+	ArchSHEB        Arch = "SCMP_ARCH_SHEB"
 )
 
 // LinuxSeccompAction taken upon Seccomp rule match
@@ -824,29 +857,67 @@ type LinuxIntelRdt struct {
 	EnableMBM bool `json:"enableMBM,omitempty"`
 }
 
-// ZOS contains platform-specific configuration for z/OS based containers.
-type ZOS struct {
-	// Devices are a list of device nodes that are created for the container
-	Devices []ZOSDevice `json:"devices,omitempty"`
+// LinuxMemoryPolicy represents input for the set_mempolicy syscall.
+type LinuxMemoryPolicy struct {
+	// Mode for the set_mempolicy syscall.
+	Mode MemoryPolicyModeType `json:"mode"`
+
+	// Nodes representing the nodemask for the set_mempolicy syscall in comma separated ranges format.
+	// Format: "<node0>-<node1>,<node2>,<node3>-<node4>,..."
+	Nodes string `json:"nodes"`
+
+	// Flags for the set_mempolicy syscall.
+	Flags []MemoryPolicyFlagType `json:"flags,omitempty"`
 }
 
-// ZOSDevice represents the mknod information for a z/OS special device file
-type ZOSDevice struct {
-	// Path to the device.
-	Path string `json:"path"`
-	// Device type, block, char, etc.
-	Type string `json:"type"`
-	// Major is the device's major number.
-	Major int64 `json:"major"`
-	// Minor is the device's minor number.
-	Minor int64 `json:"minor"`
-	// FileMode permission bits for the device.
-	FileMode *os.FileMode `json:"fileMode,omitempty"`
-	// UID of the device.
-	UID *uint32 `json:"uid,omitempty"`
-	// Gid of the device.
-	GID *uint32 `json:"gid,omitempty"`
+// ZOS contains platform-specific configuration for z/OS based containers.
+type ZOS struct {
+	// Namespaces contains the namespaces that are created and/or joined by the container
+	Namespaces []ZOSNamespace `json:"namespaces,omitempty"`
 }
+
+// ZOSNamespace is the configuration for a z/OS namespace
+type ZOSNamespace struct {
+	// Type is the type of namespace
+	Type ZOSNamespaceType `json:"type"`
+	// Path is a path to an existing namespace persisted on disk that can be joined
+	// and is of the same type
+	Path string `json:"path,omitempty"`
+}
+
+// ZOSNamespaceType is one of the z/OS namespaces
+type ZOSNamespaceType string
+
+const (
+	// PIDNamespace for isolating process IDs
+	ZOSPIDNamespace ZOSNamespaceType = "pid"
+	// MountNamespace for isolating mount points
+	ZOSMountNamespace ZOSNamespaceType = "mount"
+	// IPCNamespace for isolating System V IPC, POSIX message queues
+	ZOSIPCNamespace ZOSNamespaceType = "ipc"
+	// UTSNamespace for isolating hostname and NIS domain name
+	ZOSUTSNamespace ZOSNamespaceType = "uts"
+)
+
+type MemoryPolicyModeType string
+
+const (
+	MpolDefault            MemoryPolicyModeType = "MPOL_DEFAULT"
+	MpolBind               MemoryPolicyModeType = "MPOL_BIND"
+	MpolInterleave         MemoryPolicyModeType = "MPOL_INTERLEAVE"
+	MpolWeightedInterleave MemoryPolicyModeType = "MPOL_WEIGHTED_INTERLEAVE"
+	MpolPreferred          MemoryPolicyModeType = "MPOL_PREFERRED"
+	MpolPreferredMany      MemoryPolicyModeType = "MPOL_PREFERRED_MANY"
+	MpolLocal              MemoryPolicyModeType = "MPOL_LOCAL"
+)
+
+type MemoryPolicyFlagType string
+
+const (
+	MpolFNumaBalancing MemoryPolicyFlagType = "MPOL_F_NUMA_BALANCING"
+	MpolFRelativeNodes MemoryPolicyFlagType = "MPOL_F_RELATIVE_NODES"
+	MpolFStaticNodes   MemoryPolicyFlagType = "MPOL_F_STATIC_NODES"
+)
 
 // LinuxSchedulerPolicy represents different scheduling policies used with the Linux Scheduler
 type LinuxSchedulerPolicy string
