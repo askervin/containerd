@@ -168,4 +168,8 @@ exclude (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 )
 
-replace github.com/containerd/nri => github.com/containerd/nri v0.9.1-0.20250516150606-6d0b9468ec13
+replace (
+	github.com/containerd/nri => github.com/askervin/nri v0.1.1-0.20250520164349-2dd29ecf531e
+	github.com/opencontainers/runtime-spec => github.com/askervin/runtime-spec v1.0.3-0.20250423073229-57c949588e88
+	github.com/opencontainers/runtime-tools => github.com/askervin/runtime-tools v0.0.0-20250423115353-73be79a869ac
+)
