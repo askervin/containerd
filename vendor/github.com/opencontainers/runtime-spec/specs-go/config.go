@@ -236,6 +236,8 @@ type Linux struct {
 	Namespaces []LinuxNamespace `json:"namespaces,omitempty"`
 	// Devices are a list of device nodes that are created for the container
 	Devices []LinuxDevice `json:"devices,omitempty"`
+	// NetDevices are key-value pairs, keyed by network device name on the host, moved to the container's network namespace.
+	NetDevices map[string]LinuxNetDevice `json:"netDevices,omitempty"`
 	// Seccomp specifies the seccomp security settings for the container.
 	Seccomp *LinuxSeccomp `json:"seccomp,omitempty"`
 	// RootfsPropagation is the rootfs mount propagation mode for the container.
@@ -249,6 +251,8 @@ type Linux struct {
 	// IntelRdt contains Intel Resource Director Technology (RDT) information for
 	// handling resource constraints and monitoring metrics (e.g., L3 cache, memory bandwidth) for the container
 	IntelRdt *LinuxIntelRdt `json:"intelRdt,omitempty"`
+	// MemoryPolicy contains NUMA memory policy for the container.
+	MemoryPolicy *LinuxMemoryPolicy `json:"memoryPolicy,omitempty"`
 	// Personality contains configuration for the Linux personality syscall
 	Personality *LinuxPersonality `json:"personality,omitempty"`
 	// TimeOffsets specifies the offset for supporting time namespaces.
@@ -489,6 +493,12 @@ type LinuxDevice struct {
 	UID *uint32 `json:"uid,omitempty"`
 	// Gid of the device.
 	GID *uint32 `json:"gid,omitempty"`
+}
+
+// LinuxNetDevice represents a single network device to be added to the container's network namespace
+type LinuxNetDevice struct {
+	// Name of the device in the container namespace
+	Name string `json:"name,omitempty"`
 }
 
 // LinuxDeviceCgroup represents a device rule for the devices specified to
@@ -828,23 +838,41 @@ type LinuxSyscall struct {
 type LinuxIntelRdt struct {
 	// The identity for RDT Class of Service
 	ClosID string `json:"closID,omitempty"`
+
+	// Schemata specifies the complete schemata to be written as is to the
+	// schemata file in resctrl fs. Each element represents a single line in the schemata file.
+	// NOTE: This will overwrite schemas specified in the L3CacheSchema and/or
+	// MemBwSchema fields.
+	Schemata []string `json:"schemata,omitempty"`
+
 	// The schema for L3 cache id and capacity bitmask (CBM)
 	// Format: "L3:<cache_id0>=<cbm0>;<cache_id1>=<cbm1>;..."
+	// NOTE: Should not be specified if Schemata is non-empty.
 	L3CacheSchema string `json:"l3CacheSchema,omitempty"`
 
 	// The schema of memory bandwidth per L3 cache id
 	// Format: "MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;..."
 	// The unit of memory bandwidth is specified in "percentages" by
 	// default, and in "MBps" if MBA Software Controller is enabled.
+	// NOTE: Should not be specified if Schemata is non-empty.
 	MemBwSchema string `json:"memBwSchema,omitempty"`
 
-	// EnableCMT is the flag to indicate if the Intel RDT CMT is enabled. CMT (Cache Monitoring Technology) supports monitoring of
-	// the last-level cache (LLC) occupancy for the container.
-	EnableCMT bool `json:"enableCMT,omitempty"`
+	// EnableMonitoring enables resctrl monitoring for the container. This will
+	// create a dedicated resctrl monitoring group for the container.
+	EnableMonitoring bool `json:"enableMonitoring,omitempty"`
+}
 
-	// EnableMBM is the flag to indicate if the Intel RDT MBM is enabled. MBM (Memory Bandwidth Monitoring) supports monitoring of
-	// total and local memory bandwidth for the container.
-	EnableMBM bool `json:"enableMBM,omitempty"`
+// LinuxMemoryPolicy represents input for the set_mempolicy syscall.
+type LinuxMemoryPolicy struct {
+	// Mode for the set_mempolicy syscall.
+	Mode MemoryPolicyModeType `json:"mode"`
+
+	// Nodes representing the nodemask for the set_mempolicy syscall in comma separated ranges format.
+	// Format: "<node0>-<node1>,<node2>,<node3>-<node4>,..."
+	Nodes string `json:"nodes"`
+
+	// Flags for the set_mempolicy syscall.
+	Flags []MemoryPolicyFlagType `json:"flags,omitempty"`
 }
 
 // ZOS contains platform-specific configuration for z/OS based containers.
@@ -874,6 +902,26 @@ const (
 	ZOSIPCNamespace ZOSNamespaceType = "ipc"
 	// UTSNamespace for isolating hostname and NIS domain name
 	ZOSUTSNamespace ZOSNamespaceType = "uts"
+)
+
+type MemoryPolicyModeType string
+
+const (
+	MpolDefault            MemoryPolicyModeType = "MPOL_DEFAULT"
+	MpolBind               MemoryPolicyModeType = "MPOL_BIND"
+	MpolInterleave         MemoryPolicyModeType = "MPOL_INTERLEAVE"
+	MpolWeightedInterleave MemoryPolicyModeType = "MPOL_WEIGHTED_INTERLEAVE"
+	MpolPreferred          MemoryPolicyModeType = "MPOL_PREFERRED"
+	MpolPreferredMany      MemoryPolicyModeType = "MPOL_PREFERRED_MANY"
+	MpolLocal              MemoryPolicyModeType = "MPOL_LOCAL"
+)
+
+type MemoryPolicyFlagType string
+
+const (
+	MpolFNumaBalancing MemoryPolicyFlagType = "MPOL_F_NUMA_BALANCING"
+	MpolFRelativeNodes MemoryPolicyFlagType = "MPOL_F_RELATIVE_NODES"
+	MpolFStaticNodes   MemoryPolicyFlagType = "MPOL_F_STATIC_NODES"
 )
 
 // LinuxSchedulerPolicy represents different scheduling policies used with the Linux Scheduler

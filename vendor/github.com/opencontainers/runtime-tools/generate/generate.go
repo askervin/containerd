@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/moby/sys/capability"
 	rspec "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/opencontainers/runtime-tools/generate/seccomp"
 	capsCheck "github.com/opencontainers/runtime-tools/validate/capabilities"
-	"github.com/syndtr/gocapability/capability"
 )
 
 var (
@@ -182,7 +182,7 @@ func New(os string) (generator Generator, err error) {
 				Destination: "/dev",
 				Type:        "tmpfs",
 				Source:      "tmpfs",
-				Options:     []string{"nosuid", "noexec", "strictatime", "mode=755", "size=65536k"},
+				Options:     []string{"nosuid", "strictatime", "mode=755", "size=65536k"},
 			},
 			{
 				Destination: "/dev/pts",
@@ -323,7 +323,7 @@ func createEnvCacheMap(env []string) map[string]int {
 //
 // Deprecated: Replace with:
 //
-//   Use generator.Config = config
+//	Use generator.Config = config
 func (g *Generator) SetSpec(config *rspec.Spec) {
 	g.Config = config
 }
@@ -926,6 +926,26 @@ func (g *Generator) SetLinuxResourcesMemorySwappiness(swappiness uint64) {
 	g.Config.Linux.Resources.Memory.Swappiness = &swappiness
 }
 
+// SetLinuxMemoryPolicyMode sets g.Config.Linux.MemoryPolicy.Mode
+func (g *Generator) SetLinuxMemoryPolicyMode(mode string) {
+	g.initConfigLinuxMemoryPolicy()
+	g.Config.Linux.MemoryPolicy.Mode = rspec.MemoryPolicyModeType(mode)
+}
+
+// SetLinuxMemoryPolicyNodes sets g.Config.Linux.MemoryPolicy.Nodes
+func (g *Generator) SetLinuxMemoryPolicyNodes(nodes string) {
+	g.initConfigLinuxMemoryPolicy()
+	g.Config.Linux.MemoryPolicy.Nodes = nodes
+}
+
+// SetLinuxMemoryPolicyFlags sets g.Config.Linux.MemoryPolicy.Flags
+func (g *Generator) SetLinuxMemoryPolicyFlags(flags []string) {
+	g.initConfigLinuxMemoryPolicy()
+	for _, flag := range flags {
+		g.Config.Linux.MemoryPolicy.Flags = append(g.Config.Linux.MemoryPolicy.Flags, rspec.MemoryPolicyFlagType(flag))
+	}
+}
+
 // SetLinuxResourcesMemoryDisableOOMKiller sets g.Config.Linux.Resources.Memory.DisableOOMKiller.
 func (g *Generator) SetLinuxResourcesMemoryDisableOOMKiller(disable bool) {
 	g.initConfigLinuxResourcesMemory()
@@ -1135,10 +1155,11 @@ func (g *Generator) ClearMounts() {
 func (g *Generator) SetupPrivileged(privileged bool) {
 	if privileged { // Add all capabilities in privileged mode.
 		var finalCapList []string
-		for _, cap := range capability.List() {
-			if g.HostSpecific && cap > capsCheck.LastCap() {
-				continue
-			}
+		capList := capability.ListKnown()
+		if g.HostSpecific {
+			capList, _ = capability.ListSupported()
+		}
+		for _, cap := range capList {
 			finalCapList = append(finalCapList, fmt.Sprintf("CAP_%s", strings.ToUpper(cap.String())))
 		}
 		g.initConfigLinux()
