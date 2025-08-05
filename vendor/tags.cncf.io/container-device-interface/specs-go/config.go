@@ -64,9 +64,8 @@ type Hook struct {
 
 // IntelRdt describes the Linux IntelRdt parameters to set in the OCI spec.
 type IntelRdt struct {
-	ClosID        string `json:"closID,omitempty"        yaml:"closID,omitempty"`
-	L3CacheSchema string `json:"l3CacheSchema,omitempty" yaml:"l3CacheSchema,omitempty"`
-	MemBwSchema   string `json:"memBwSchema,omitempty"   yaml:"memBwSchema,omitempty"`
-	EnableCMT     bool   `json:"enableCMT,omitempty"     yaml:"enableCMT,omitempty"`
-	EnableMBM     bool   `json:"enableMBM,omitempty"     yaml:"enableMBM,omitempty"`
+	ClosID           string `json:"closID,omitempty"        yaml:"closID,omitempty"`
+	L3CacheSchema    string `json:"l3CacheSchema,omitempty" yaml:"l3CacheSchema,omitempty"`
+	MemBwSchema      string `json:"memBwSchema,omitempty"   yaml:"memBwSchema,omitempty"`
+	EnableMonitoring bool   `json:"enableMonitoring,omitempty"     yaml:"enableMonitoring,omitempty"`
 }

@@ -925,14 +925,16 @@ sigs.k8s.io/structured-merge-diff/v4/value
 ## explicit; go 1.12
 sigs.k8s.io/yaml
 sigs.k8s.io/yaml/goyaml.v2
-# tags.cncf.io/container-device-interface v1.0.1
+# tags.cncf.io/container-device-interface v1.0.1 => github.com/askervin/container-device-interface v0.0.0-20250805142457-555c7fbc6383
 ## explicit; go 1.20
 tags.cncf.io/container-device-interface/internal/validation
 tags.cncf.io/container-device-interface/internal/validation/k8s
 tags.cncf.io/container-device-interface/pkg/cdi
 tags.cncf.io/container-device-interface/pkg/parser
-# tags.cncf.io/container-device-interface/specs-go v1.0.0
+# tags.cncf.io/container-device-interface/specs-go v1.0.0 => github.com/askervin/container-device-interface/specs-go v0.0.0-20250805142457-555c7fbc6383
 ## explicit; go 1.19
 tags.cncf.io/container-device-interface/specs-go
 # github.com/containerd/nri => github.com/askervin/nri v0.1.1-0.20250805132206-a9827f7d8b9a
 # github.com/opencontainers/runtime-tools => github.com/askervin/runtime-tools v0.0.0-20250805113549-904c7269e2a7
+# tags.cncf.io/container-device-interface => github.com/askervin/container-device-interface v0.0.0-20250805142457-555c7fbc6383
+# tags.cncf.io/container-device-interface/specs-go => github.com/askervin/container-device-interface/specs-go v0.0.0-20250805142457-555c7fbc6383

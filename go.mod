@@ -171,4 +171,6 @@ exclude (
 replace (
 	github.com/containerd/nri => github.com/askervin/nri v0.1.1-0.20250805132206-a9827f7d8b9a
 	github.com/opencontainers/runtime-tools => github.com/askervin/runtime-tools v0.0.0-20250805113549-904c7269e2a7
+	tags.cncf.io/container-device-interface => github.com/askervin/container-device-interface v0.0.0-20250805142457-555c7fbc6383
+	tags.cncf.io/container-device-interface/specs-go => github.com/askervin/container-device-interface/specs-go v0.0.0-20250805142457-555c7fbc6383
 )

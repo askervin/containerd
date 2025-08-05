@@ -12,6 +12,10 @@ github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuy
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
+github.com/askervin/container-device-interface v0.0.0-20250805142457-555c7fbc6383 h1:+hkmau2jSWdwdvmfl5FYme88ShpwW1XIioPmQd1DNlY=
+github.com/askervin/container-device-interface v0.0.0-20250805142457-555c7fbc6383/go.mod h1:q8VEvq5LMfq3adisUz9Qdc0fFgDILZFtgPmrhqTL6ZM=
+github.com/askervin/container-device-interface/specs-go v0.0.0-20250805142457-555c7fbc6383 h1:1kVUals+ESTrWftoqoe8J+6m2pLkQy7budDMUswkrM0=
+github.com/askervin/container-device-interface/specs-go v0.0.0-20250805142457-555c7fbc6383/go.mod h1:u86hoFWqnh3hWz3esofRFKbI261bUlvUfLKGrDhJkgQ=
 github.com/askervin/nri v0.1.1-0.20250805132206-a9827f7d8b9a h1:1MlnYAVGwd9Em/3DRA4VLRO+ImSZS1LxGXli/mpBzJs=
 github.com/askervin/nri v0.1.1-0.20250805132206-a9827f7d8b9a/go.mod h1:Ej7TxkHmzXcTmlgOkycncvLzi54rwi1nV/ScEapghLk=
 github.com/askervin/runtime-tools v0.0.0-20250805113549-904c7269e2a7 h1:yPppk/QM8TPa7yMKixueE5cAyeZH/erv68Md57qcJ0o=
@@ -565,7 +569,3 @@ sigs.k8s.io/structured-merge-diff/v4 v4.6.0 h1:IUA9nvMmnKWcj5jl84xn+T5MnlZKThmUW
 sigs.k8s.io/structured-merge-diff/v4 v4.6.0/go.mod h1:dDy58f92j70zLsuZVuUX5Wp9vtxXpaZnkPGWeqDfCps=
 sigs.k8s.io/yaml v1.4.0 h1:Mk1wCc2gy/F0THH0TAp1QYyJNzRm2KCLy3o5ASXVI5E=
 sigs.k8s.io/yaml v1.4.0/go.mod h1:Ejl7/uTz7PSA4eKMyQCUTnhZYNmLIl+5c2lQPGR2BPY=
-tags.cncf.io/container-device-interface v1.0.1 h1:KqQDr4vIlxwfYh0Ed/uJGVgX+CHAkahrgabg6Q8GYxc=
-tags.cncf.io/container-device-interface v1.0.1/go.mod h1:JojJIOeW3hNbcnOH2q0NrWNha/JuHoDZcmYxAZwb2i0=
-tags.cncf.io/container-device-interface/specs-go v1.0.0 h1:8gLw29hH1ZQP9K1YtAzpvkHCjjyIxHZYzBAvlQ+0vD8=
-tags.cncf.io/container-device-interface/specs-go v1.0.0/go.mod h1:u86hoFWqnh3hWz3esofRFKbI261bUlvUfLKGrDhJkgQ=
